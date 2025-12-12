@@ -1,4 +1,4 @@
 package com.feedly.feedlyclonebackend.controller
 
-class UserController {
+class AccountController {
 }
