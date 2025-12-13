@@ -22,6 +22,7 @@ class AccountController
     @GetMapping("/signup")
     fun signupPage(@ModelAttribute("signupForm") signupForm: SignupForm, model: Model): String
     {
+        println("회원가입")
         return "signup"
     }
 
@@ -44,5 +45,9 @@ class AccountController
         }
 
         return "redirect:/account/signin"
+    }
+    @GetMapping("/signin")
+    fun signinPage(): String {
+        return "signin"
     }
 }

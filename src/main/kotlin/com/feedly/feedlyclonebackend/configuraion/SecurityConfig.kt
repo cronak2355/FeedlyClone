@@ -17,8 +17,38 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
+
             .authorizeHttpRequests { auth ->
-                auth.anyRequest().permitAll()
+                auth
+                    // 로그인 페이지 & 로그인 요청은 허용
+                    .requestMatchers(
+                        "/account/signin",
+                        "/account/signup",
+                        "/login",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/"
+                    ).permitAll()
+
+                    // 나머지는 로그인 필요
+                    .anyRequest().authenticated()
+            }
+
+            .formLogin { form ->
+                form
+                    .loginPage("/account/signin")   // GET 로그인 페이지
+                    .loginProcessingUrl("/login")   // POST 처리 URL
+                    .usernameParameter("email")     // form input name
+                    .passwordParameter("password")
+                    .defaultSuccessUrl("/", true)
+                    .permitAll()
+            }
+
+            .logout { logout ->
+                logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/")
             }
 
         return http.build()
