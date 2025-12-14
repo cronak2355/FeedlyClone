@@ -1,0 +1,79 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::content}, ~{::script})">
+
+<div th:fragment="content" class="container py-5" style="max-width: 520px;">
+    <h2 class="mb-4">회원가입</h2>
+
+    <!-- 서버 메시지 -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/account/signup}"
+          method="post"
+          th:object="${signupForm}"
+          class="card p-4 shadow-sm"
+          id="signup">
+
+        <!-- 이메일 -->
+        <div class="mb-3">
+            <label for="email" class="form-label">이메일</label>
+            <input id="email"
+                   type="email"
+                   class="form-control"
+                   placeholder="example@email.com"
+                   th:field="*{email}">
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('email')}"
+                 th:errors="*{email}">
+            </div>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="mb-3">
+            <label for="password" class="form-label">비밀번호</label>
+            <input id="password"
+                   type="password"
+                   class="form-control"
+                   placeholder="8자 이상 권장"
+                   th:field="*{password}">
+            <div class="text-danger"
+                 th:if="${#fields.hasErrors('password')}"
+                 th:errors="*{password}">
+            </div>
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <div class="mb-3">
+            <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+            <input id="passwordConfirm"
+                   type="password"
+                   class="form-control">
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="button" onclick="checkPassword()" class="btn btn-primary">가입하기</button>
+            <a th:href="@{/auth/login}" class="btn btn-outline-secondary">
+                이미 계정 있음 (로그인)
+            </a>
+        </div>
+    </form>
+</div>
+
+<script th:fragment="script">
+    // 프론트단 1차 검증 (선택)
+    function checkPassword()
+    {
+        let password = $('#password').val()
+        let password_confirm= $('#passwordConfirm').val()
+        if (password != password_confirm)
+        {
+            alert('비밀번호가 일치하지 않습니다.')
+            $('#passwordConfirm')[0].focus();
+            return;
+        }
+        document.getElementById("signup").requestSubmit();
+    }
+</script>
+
+</html>
