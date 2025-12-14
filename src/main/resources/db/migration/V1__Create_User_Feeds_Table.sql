@@ -35,6 +35,13 @@ CREATE TABLE IF NOT EXISTS popular_feeds (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+create table account(
+    id bigint auto_increment primary key
+    ,email varchar(128) not null unique
+    ,password varchar(256) not null
+);
+
+
 -- 인기 피드 초기 데이터
 INSERT INTO popular_feeds (feed_url, site_url, title, description, category, subscriber_count) VALUES
 ('https://techcrunch.com/feed/', 'https://techcrunch.com', 'TechCrunch', 'Startup and technology news', 'Technology', 15000),
