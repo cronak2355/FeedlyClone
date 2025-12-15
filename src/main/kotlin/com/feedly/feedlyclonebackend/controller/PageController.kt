@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class PageController {
 
-    @GetMapping("/")
-    fun index(): String = "index"
-
     @GetMapping("/layout")
     fun layout(): String = "layout"
 
