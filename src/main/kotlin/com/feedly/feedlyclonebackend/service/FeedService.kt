@@ -2,6 +2,7 @@ package com.feedly.feedlyclonebackend.service
 
 import com.feedly.feedlyclonebackend.dto.*
 import com.feedly.feedlyclonebackend.entity.UserFeed
+import com.feedly.feedlyclonebackend.repository.FeedRepository
 import com.feedly.feedlyclonebackend.repository.PopularFeedRepository
 import com.feedly.feedlyclonebackend.repository.UserFeedRepository
 import com.rometools.rome.feed.synd.SyndFeed
@@ -20,7 +21,8 @@ import java.time.ZoneId
 class FeedService(
     private val userFeedRepository: UserFeedRepository,
     private val popularFeedRepository: PopularFeedRepository,
-    private val newsApiService: NewsApiService
+    private val newsApiService: NewsApiService,
+    private val feedRepository: FeedRepository
 ) {
     private val logger = LoggerFactory.getLogger(FeedService::class.java)
 
@@ -35,6 +37,8 @@ class FeedService(
         private const val REDDIT_RSS_TEMPLATE = "https://www.reddit.com/r/%s/.rss"
         private const val REDDIT_ICON_URL = "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png"
     }
+    fun getFeedsByCompany(companyId: Long) =
+        feedRepository.findByCompany(companyId)
 
     /**
      * 주제/키워드로 피드 검색 (NewsAPI + DB 통합)
