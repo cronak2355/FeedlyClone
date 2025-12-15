@@ -29,6 +29,18 @@ class UserService(
         return userRepository.save(account)
     }
 
+    fun emailExists(email: String): Boolean {
+        return userRepository.existsByEmail(email)
+    }
+
+    fun createUser(email: String, password: String): Account {
+        val account = Account(
+            email = email,
+            password = passwordEncoder.encode(password)!!
+        )
+        return userRepository.save(account)
+    }
+
     override fun loadUserByUsername(email: String): UserDetails {
         val account = userRepository.findByEmail(email)
             ?: throw UsernameNotFoundException("No user found with email: $email")

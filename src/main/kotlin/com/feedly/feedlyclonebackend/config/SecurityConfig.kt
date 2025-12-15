@@ -23,12 +23,8 @@ class SecurityConfig {
         requestHandler.setCsrfRequestAttributeName("_csrf")
 
         http
-            // 1. CSRF 설정 (기존 유지)
-            .csrf { csrf ->
-                csrf
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .csrfTokenRequestHandler(requestHandler)
-            }
+            // 1. CSRF 비활성화 (개발 테스트용)
+            .csrf { it.disable() }
 
             // 2. HTTP Basic 비활성화 (폼 로그인만 사용할 경우 권장)
             .httpBasic { it.disable() }
@@ -40,10 +36,11 @@ class SecurityConfig {
                     .requestMatchers(
                         "/signup",
                         "/login",
+                        "/api/**",  // React API 엔드포인트
                         "/css/**",
                         "/js/**",
                         "/images/**",
-                        "/favicon.ico", // 아이콘 요청도 허용하는 것이 좋음
+                        "/favicon.ico",
                         "/"
                     ).permitAll()
 

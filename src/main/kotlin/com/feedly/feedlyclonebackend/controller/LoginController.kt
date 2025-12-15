@@ -8,6 +8,7 @@ class LoginController {
 
     @GetMapping("/login")
     fun login(): String {
-        return "login"
+        // React 앱으로 리디렉션
+        return "redirect:http://localhost:5173/login"
     }
 }
