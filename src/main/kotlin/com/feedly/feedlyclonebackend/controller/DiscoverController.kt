@@ -26,41 +26,46 @@ class DiscoverController(
         @RequestParam(required = false) query: String?,
         @RequestParam(required = false) category: String?,
         @RequestParam(required = false) source: String?,
+        @RequestParam(required = false, defaultValue = "headlines") view: String,
         model: Model
     ): String {
-        logger.debug("Discover page - query: $query, category: $category, source: $source")
+        logger.debug("Discover page - query: $query, category: $category, source: $source, view: $view")
 
         // 카테고리 목록 (NewsAPI + DB 통합)
         val categories = feedService.getAllCategories()
         model.addAttribute("categories", categories)
         model.addAttribute("selectedCategory", category ?: "")
         model.addAttribute("query", query ?: "")
-        model.addAttribute("source", source ?: "all")
+        model.addAttribute("view", view)
 
-        // 검색 또는 카테고리 필터
-        val feeds = when {
-            !query.isNullOrBlank() -> {
-                val result = feedService.searchFeeds(query)
-                model.addAttribute("searchResult", result)
-                result.feeds
+        // 검색 또는 카테고리 필터 (view가 'feeds'이거나 검색어가 있을 때, 혹은 'all'일 때)
+        if (view == "feeds" || view == "all" || !query.isNullOrBlank()) {
+            val feeds = when {
+                !query.isNullOrBlank() -> {
+                    val result = feedService.searchFeeds(query)
+                    model.addAttribute("searchResult", result)
+                    result.feeds
+                }
+                source == "newsapi" -> {
+                    // NewsAPI만 조회
+                    feedService.getNewsApiSourcesByCategory(category?.lowercase())
+                }
+                else -> {
+                    // 전체 (NewsAPI + DB)
+                    feedService.getFeedsByCategory(category)
+                }
             }
-            source == "newsapi" -> {
-                // NewsAPI만 조회
-                feedService.getNewsApiSourcesByCategory(category?.lowercase())
-            }
-            else -> {
-                // 전체 (NewsAPI + DB)
-                feedService.getFeedsByCategory(category)
-            }
+            model.addAttribute("feeds", feeds)
+            model.addAttribute("feedCount", feeds.size)
+            
+            // 검색어가 있으면 뷰를 강제로 feeds로 전환 효과를 줄 수도 있음 (선택사항)
         }
 
-        model.addAttribute("feeds", feeds)
-        model.addAttribute("feedCount", feeds.size)
-
-        // 헤드라인 뉴스 (메인 페이지에 표시)
-        if (query.isNullOrBlank()) {
+        // 헤드라인 뉴스 (메인 페이지에 표시) - view가 'headlines'이거나 'all'일 때
+        if ((view == "headlines" || view == "all") && query.isNullOrBlank()) {
             val headlines = feedService.getTopHeadlines(category = category?.lowercase())
-            model.addAttribute("headlines", headlines.take(5))
+            model.addAttribute("headlines", headlines.take(20)) 
+            // Headlines 뷰에서는 더 많이 보여줌
         }
 
         return "discover"

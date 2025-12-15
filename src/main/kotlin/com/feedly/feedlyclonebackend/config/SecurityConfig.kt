@@ -38,8 +38,7 @@ class SecurityConfig {
                 auth
                     // 정적 자원 및 로그인/회원가입 페이지는 누구나 접근 가능
                     .requestMatchers(
-                        "/account/signin",
-                        "/account/signup",
+                        "/signup",
                         "/login",
                         "/css/**",
                         "/js/**",
@@ -55,9 +54,9 @@ class SecurityConfig {
             // 4. 폼 로그인 설정 (비활성화 코드 제거)
             .formLogin { form ->
                 form
-                    .loginPage("/account/signin")   // 커스텀 로그인 페이지 경로
+                    .loginPage("/login")   // 커스텀 로그인 페이지 경로
                     .loginProcessingUrl("/login")   // HTML Form의 action 경로
-                    .usernameParameter("email")     // Form의 input name="email"
+                    .usernameParameter("username")     // Form의 input name="username"
                     .passwordParameter("password")  // Form의 input name="password"
                     .defaultSuccessUrl("/", true)   // 로그인 성공 시 이동할 경로
                     .permitAll()                    // 로그인 페이지 자체는 접근 허용

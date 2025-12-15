@@ -3,7 +3,9 @@ package com.feedly.feedlyclonebackend
 import io.github.cdimascio.dotenv.Dotenv
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cache.annotation.EnableCaching
 
+@EnableCaching
 @SpringBootApplication
 class FeedlyCloneBackendApplication
 fun main(args: Array<String>) {
