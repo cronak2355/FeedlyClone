@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 import org.springframework.http.MediaType
+import org.springframework.cache.annotation.Cacheable
 
 /**
  * NewsAPI 연동 서비스
@@ -99,6 +100,7 @@ class NewsApiService(
      * 헤드라인 뉴스 조회
      * GET /v2/top-headlines
      */
+    @Cacheable(value = ["newsHeadlines"], key = "{#country, #category, #sources, #query, #pageSize}", unless = "#result.isEmpty()")
     fun getTopHeadlines(
         country: String? = "us",
         category: String? = null,
@@ -143,6 +145,7 @@ class NewsApiService(
      * 기사 검색
      * GET /v2/everything
      */
+    @Cacheable(value = ["newsSearch"], key = "{#query, #sources, #domains, #language, #sortBy, #pageSize}", unless = "#result.isEmpty()")
     fun searchArticles(
         query: String,
         sources: String? = null,

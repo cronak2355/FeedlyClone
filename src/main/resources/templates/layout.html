@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, script)">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Feedly Clone - Discover</title>
-    
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Feedly Clone</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -14,34 +15,71 @@
     <!-- Custom CSS -->
     <link href="/css/discover.css" rel="stylesheet">
 </head>
+
 <body>
 
-<!-- 네비게이션 바 -->
-<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="app-sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <i class="bi bi-rss-fill text-feedly me-2"></i>
+                Feedly Clone
+            </div>
 
-<!-- 메인 컨텐츠 -->
-<main class="main-content">
-    <div th:replace="${content}"></div>
-</main>
+            <div class="sidebar-nav">
+                <a href="/discover" class="sidebar-item" th:classappend="${currentPath == 'discover'} ? 'active'">
+                    <i class="bi bi-compass"></i>
+                    Explore
+                </a>
+                <a href="/discover/news" class="sidebar-item" th:classappend="${currentPath == 'news'} ? 'active'">
+                    <i class="bi bi-newspaper"></i>
+                    News
+                </a>
+                <a href="/discover/reddit" class="sidebar-item" th:classappend="${currentPath == 'reddit'} ? 'active'">
+                    <i class="bi bi-reddit"></i>
+                    Reddit
+                </a>
 
-<!-- 토스트 알림 컨테이너 -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="toast-notification" class="toast" role="alert">
-        <div class="toast-header">
-            <i class="bi bi-bell me-2"></i>
-            <strong class="me-auto">알림</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body"></div>
+                <div class="nav-section-title">Library</div>
+                <a href="/saved" class="sidebar-item" th:classappend="${currentPath == 'saved'} ? 'active'">
+                    <i class="bi bi-bookmark"></i>
+                    Read Later
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Content gets injected here -->
+            <div th:replace="${content}"></div>
+        </main>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/discover.js"></script>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('show')">
+        <i class="bi bi-list"></i>
+    </button>
 
-<!-- 페이지별 스크립트 -->
-<th:block th:replace="${script}"></th:block>
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast-notification" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-bell me-2 text-feedly"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/discover.js"></script>
+
+    <!-- Scripts -->
+    <th:block th:replace="${script}"></th:block>
+
 </body>
+
 </html>

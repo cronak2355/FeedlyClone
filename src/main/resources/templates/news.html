@@ -1,167 +1,142 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::content}, ~{::script})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content}, ~{::script})}">
 
 <div th:fragment="content">
-    <div class="container-fluid py-4">
-        <div class="row">
-            <!-- 사이드바 -->
-            <div class="col-lg-2 col-md-3 mb-4">
-                <!-- 카테고리 필터 -->
-                <div class="card sidebar-card">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0">
-                            <i class="bi bi-funnel me-2"></i>카테고리
-                        </h6>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a th:href="@{/discover/news(country=${selectedCountry})}" 
-                           class="list-group-item list-group-item-action"
-                           th:classappend="${selectedCategory == ''} ? 'active'">
-                            <i class="bi bi-grid me-2"></i>전체
-                        </a>
-                        <a th:each="cat : ${categories}"
-                           th:href="@{/discover/news(category=${cat}, country=${selectedCountry})}"
-                           class="list-group-item list-group-item-action"
-                           th:classappend="${selectedCategory == cat} ? 'active'">
-                            <i class="bi bi-tag me-2"></i>
-                            <span th:text="${cat}">Category</span>
-                        </a>
-                    </div>
-                </div>
 
-                <!-- 국가 필터 -->
-                <div class="card mt-3">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0">
-                            <i class="bi bi-globe me-2"></i>국가
-                        </h6>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a th:each="country : ${countries}"
-                           th:href="@{/discover/news(country=${country.key}, category=${selectedCategory})}"
-                           class="list-group-item list-group-item-action"
-                           th:classappend="${selectedCountry == country.key} ? 'active'">
-                            <span th:text="${country.value}">Country</span>
-                        </a>
-                    </div>
-                </div>
+    <!-- Header & Search -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0" th:if="${query == null}" th:text="${selectedCategory != '' ? selectedCategory : 'Today'}">Today
+        </h2>
+        <h2 class="m-0" th:if="${query != null}">Search <span th:text="${query}"></span></h2>
+    </div>
 
-                <!-- 돌아가기 -->
-                <div class="card mt-3">
-                    <div class="list-group list-group-flush">
-                        <a href="/discover" class="list-group-item list-group-item-action">
-                            <i class="bi bi-arrow-left me-2"></i>피드 탐색으로
-                        </a>
-                    </div>
-                </div>
+    <form class="header-search" action="/discover/news" method="get">
+        <i class="bi bi-search"></i>
+        <input type="search" name="query" placeholder="Search for news, symbols or rss..." th:value="${query}">
+        <input type="hidden" name="country" th:value="${selectedCountry}">
+        <input type="hidden" name="category" th:value="${selectedCategory}">
+    </form>
+
+    <!-- Filters (Optional - simplified for now) -->
+
+    <!-- Article List (Magazine View) -->
+    <div th:if="${articles != null and !articles.isEmpty()}" class="article-list">
+
+        <div class="article-item" th:each="article : ${articles}">
+            <!-- Thumbnail -->
+            <img th:if="${article.thumbnailUrl != null}" th:src="${article.thumbnailUrl}" class="article-thumb"
+                alt="thumbnail" onerror="this.style.display='none'">
+            <div th:unless="${article.thumbnailUrl != null}"
+                class="article-thumb d-flex align-items-center justify-content-center bg-light text-secondary">
+                <i class="bi bi-image fs-1 opacity-25"></i>
             </div>
 
-            <!-- 메인 콘텐츠 -->
-            <div class="col-lg-10 col-md-9">
-                <!-- 페이지 헤더 -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h4 class="mb-1">
-                            <i class="bi bi-newspaper text-primary me-2"></i>
-                            <span th:if="${query != null and query != ''}">
-                                "<span th:text="${query}"></span>" 뉴스 검색
-                            </span>
-                            <span th:if="${query == null or query == ''}">
-                                <span th:text="${countries[selectedCountry]}">Country</span>
-                                <span th:if="${selectedCategory != ''}">
-                                    - <span th:text="${selectedCategory}">Category</span>
-                                </span>
-                                헤드라인
-                            </span>
-                        </h4>
-                        <p class="text-muted mb-0">
-                            <span th:text="${articleCount}">0</span>개의 기사
-                            <span class="badge bg-info ms-2">
-                                <i class="bi bi-globe me-1"></i>NewsAPI
-                            </span>
-                        </p>
+            <!-- Content -->
+            <div class="article-content">
+                <div>
+                    <div class="article-meta">
+                        <span class="article-source" th:text="${article.author ?: 'Unknown Source'}">Source</span>
+                        <span>•</span>
+                        <span th:text="${#temporals.format(article.publishedDate, 'MMM dd, HH:mm')}">Date</span>
                     </div>
+
+                    <a th:href="${article.link}" target="_blank" class="text-decoration-none">
+                        <h3 class="article-title" th:text="${article.title}">Title</h3>
+                    </a>
+
+                    <p class="article-desc" th:text="${article.description}">Description</p>
                 </div>
 
-                <!-- 검색 폼 -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form action="/discover/news" method="get">
-                            <input type="hidden" name="country" th:value="${selectedCountry}">
-                            <input type="hidden" name="category" th:value="${selectedCategory}">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="search" name="query" class="form-control" 
-                                       placeholder="뉴스 검색 (예: technology, bitcoin, korea...)"
-                                       th:value="${query}">
-                                <button class="btn btn-primary px-4" type="submit">
-                                    검색
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <div class="article-actions">
+                    <button class="action-btn save-btn" th:data-url="${article.link}" th:data-title="${article.title}"
+                        th:data-desc="${article.description}" th:data-thumb="${article.thumbnailUrl}"
+                        title="Read Later">
+                        <i class="bi bi-bookmark"></i>
+                    </button>
 
-                <!-- 기사 목록 -->
-                <div th:if="${articles != null and !articles.isEmpty()}" class="row row-cols-1 g-3">
-                    <div class="col" th:each="article : ${articles}">
-                        <div class="card article-card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- 썸네일 -->
-                                    <div th:if="${article.thumbnailUrl != null}" class="col-md-3 col-sm-4 mb-3 mb-md-0">
-                                        <img th:src="${article.thumbnailUrl}" 
-                                             class="img-fluid rounded article-thumbnail"
-                                             alt="thumbnail"
-                                             onerror="this.parentElement.style.display='none'">
-                                    </div>
-                                    <!-- 내용 -->
-                                    <div th:class="${article.thumbnailUrl != null} ? 'col-md-9 col-sm-8' : 'col-12'">
-                                        <h5 class="card-title mb-2">
-                                            <a th:href="${article.link}" target="_blank" class="text-decoration-none text-dark">
-                                                <span th:text="${article.title}">Article Title</span>
-                                                <i class="bi bi-box-arrow-up-right ms-1 small text-muted"></i>
-                                            </a>
-                                        </h5>
-                                        <p class="card-text text-muted mb-2" 
-                                           th:if="${article.description != null}"
-                                           th:text="${#strings.abbreviate(article.description, 200)}">
-                                            Description
-                                        </p>
-                                        <div class="d-flex align-items-center text-muted small">
-                                            <span th:if="${article.author != null}" class="me-3">
-                                                <i class="bi bi-person me-1"></i>
-                                                <span th:text="${article.author}">Author</span>
-                                            </span>
-                                            <span th:if="${article.publishedDate != null}">
-                                                <i class="bi bi-clock me-1"></i>
-                                                <span th:text="${#temporals.format(article.publishedDate, 'yyyy-MM-dd HH:mm')}">Date</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 결과 없음 -->
-                <div th:if="${articles == null or articles.isEmpty()}" class="text-center py-5">
-                    <i class="bi bi-newspaper display-1 text-muted mb-3"></i>
-                    <h5>기사를 찾을 수 없습니다</h5>
-                    <p class="text-muted">다른 검색어나 카테고리를 시도해보세요</p>
+                    <button class="action-btn read-btn" th:data-url="${article.link}" th:data-title="${article.title}"
+                        th:data-desc="${article.description}" th:data-thumb="${article.thumbnailUrl}"
+                        title="Mark as Read">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
                 </div>
             </div>
         </div>
+
     </div>
+
+    <!-- Empty State -->
+    <div th:if="${articles == null or articles.isEmpty()}" class="empty-state">
+        <i class="bi bi-search"></i>
+        <h4>No articles found</h4>
+        <p>Try searching for something else or check back later.</p>
+    </div>
+
 </div>
 
 <script th:fragment="script">
-$(document).ready(function() {
-    updateFollowingCount();
-});
+    $(document).ready(function () {
+        // Init Tooltips if needed (Bootstrap 5)
+        // var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) })
+
+        // Save Function
+        $('.save-btn').click(function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            var icon = btn.find('i');
+
+            var data = {
+                url: btn.data('url'),
+                title: btn.data('title'),
+                description: btn.data('desc'), // Note: Ensure controller expects description
+                thumbnailUrl: btn.data('thumb')
+            };
+
+            $.ajax({
+                url: '/api/articles/save',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res.isSaved) {
+                        btn.addClass('active');
+                        icon.removeClass('bi-bookmark').addClass('bi-bookmark-check-fill');
+                    } else {
+                        btn.removeClass('active');
+                        icon.removeClass('bi-bookmark-check-fill').addClass('bi-bookmark');
+                    }
+                },
+                error: function (err) {
+                    console.error("Save failed", err);
+                }
+            });
+        });
+
+        // Mark as Read
+        $('.read-btn').click(function (e) {
+            e.preventDefault();
+            var btn = $(this);
+
+            var data = {
+                url: btn.data('url'),
+                title: btn.data('title'),
+                description: btn.data('desc'),
+                thumbnailUrl: btn.data('thumb')
+            };
+
+            $.ajax({
+                url: '/api/articles/read',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    btn.addClass('text-success');
+                    btn.closest('.article-item').css('opacity', '0.6');
+                }
+            });
+        });
+    });
 </script>
+
 </html>
