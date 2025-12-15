@@ -1,7 +1,7 @@
 package com.feedly.feedlyclonebackend.entity
 
-data class Feed(
+data class Keyword(
     val id: Long,
-    val companyId: Long,
-    val url: String
+    val type: String,
+    val name: String
 )
