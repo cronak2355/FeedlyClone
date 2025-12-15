@@ -1153,3 +1153,136 @@ h6 {
 .search-empty-state p {
     color: var(--text-secondary);
 }
+/* Keyword Search Box */
+.keyword-search-box {
+    margin-bottom: 1.5rem;
+}
+
+.keyword-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.keyword-input {
+    flex: 1;
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.keyword-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.keyword-btn {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    color: white;
+    cursor: pointer;
+}
+
+.keyword-btn:hover { background: var(--primary-hover); }
+.keyword-btn:disabled { opacity: 0.6; }
+
+/* Search Results */
+.search-results {
+    margin-bottom: 2rem;
+}
+
+.search-results h5 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.search-result-item.has-feed {
+    border-left: 3px solid var(--primary-color);
+}
+
+.result-favicon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+}
+
+.result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.result-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    display: block;
+}
+
+.result-title:hover { color: var(--primary-color); }
+
+.result-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.result-articles {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+}
+
+.result-articles li {
+    padding: 0.2rem 0;
+}
+
+.result-articles a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.result-articles a:hover { color: var(--primary-color); }
+
+.follow-btn {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.follow-btn:hover { background: var(--primary-hover); }
+
+.followed-badge {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.no-rss {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    background: var(--bg-body);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
