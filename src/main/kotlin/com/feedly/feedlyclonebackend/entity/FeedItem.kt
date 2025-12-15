@@ -12,6 +12,9 @@ class FeedItem(
     val id: Long = 0,
 
     @Column(nullable = false)
+    val companyId: Long,
+
+    @Column(nullable = false)
     val userId: Long,
 
     @Column(nullable = false, length = 500)
@@ -30,7 +33,8 @@ class FeedItem(
     val publishedAt: LocalDateTime,
 
     @Column(nullable = false)
-    var isRead: Boolean = false
+    var isRead: Boolean = false,
+
 
     val url: String,
 )

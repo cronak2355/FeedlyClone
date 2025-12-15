@@ -22,7 +22,9 @@ import java.time.ZoneId
 class FeedService(
     private val userFeedRepository: UserFeedRepository,
     private val popularFeedRepository: PopularFeedRepository,
-    private val newsApiService: NewsApiService
+    private val feedItemRepository: FeedItemRepository,
+    private val newsApiService: NewsApiService,
+    private val feedRepository: FeedRepository
 ) {
     private val logger = LoggerFactory.getLogger(FeedService::class.java)
 
@@ -38,7 +40,7 @@ class FeedService(
         private const val REDDIT_ICON_URL = "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png"
     }
     fun getFeedsByCompany(companyId: Long) =
-        feedRepository.findByCompany(companyId)
+        feedRepository.findByCompanyId(companyId)
 
     fun getTodayMePosts(userId: Long): List<FeedItem> {
         val since = LocalDateTime.now().minusDays(30)
@@ -52,8 +54,6 @@ class FeedService(
         item.isRead = true
         feedItemRepository.save(item)
     }
-    fun getFeedsByCompany(companyId: Long) =
-        feedRepository.findByCompany(companyId)
 
     /**
      * 주제/키워드로 피드 검색 (NewsAPI + DB 통합)

@@ -10,9 +10,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.jdbc.core.JdbcTemplate
 
 @Repository
-interface FeedItemRepository : JpaRepository<FeedItem, Long> (
-    private val jdbcTemplate: JdbcTemplate
-){
+interface FeedItemRepository : JpaRepository<FeedItem, Long>{
 
     @Query("""
         select f from FeedItem f
@@ -26,17 +24,7 @@ interface FeedItemRepository : JpaRepository<FeedItem, Long> (
         @Param("since") since: LocalDateTime
     ): List<com.feedly.feedlyclonebackend.dto.FeedItem>
 
-    fun findByCompany(companyId: Long): List<Feed> =
-        jdbcTemplate.query(
-            "SELECT id, company_id, url FROM feed WHERE company_id = ?",
-            arrayOf(companyId)
-        ) { rs, _ ->
-            Feed(
-                rs.getLong("id"),
-                rs.getLong("company_id"),
-                rs.getString("url")
-            )
-        }
+    fun findByCompanyId(companyId: Long): List<Feed>
 }
 
 
