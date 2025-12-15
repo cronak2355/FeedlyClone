@@ -38,6 +38,14 @@ export default function Layout({ children }: LayoutProps) {
                         <span>Search</span>
                     </Link>
 
+                    <Link to="/discover/createAIfeed" className={`sidebar-item ${isActive('/discover/createAIfeed') ? 'active' : ''}`}>
+                        <i className="bi bi-CreateAIFeedPage"></i>
+                        <span>CreateAIFeed</span>
+                    </Link>
+                </nav>
+
+                <div className="nav-section-title">Library</div>
+
                     <Link to="/saved" className={`sidebar-item ${isActive('/saved') ? 'active' : ''}`}>
                         <i className="bi bi-bookmark"></i>
                         <span>Read Later</span>
