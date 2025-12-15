@@ -37,7 +37,37 @@ export default function RedditPage() {
             fetchSubreddit(selectedSub);
         }
     }, [selectedSub]);
+    async function followFeed(feed: SubredditFeed) {
+        const url = feed.isFollowed
+            ? "http://localhost:8080/discover/unfollow"
+            : "http://localhost:8080/discover/follow";
 
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+            feedUrl: feed.feedUrl,      // 여기도 siteUrl 말고 feedUrl이 맞을 확률 높음
+            title: feed.title,
+            description: feed.description,
+            faviconUrl: feed.iconUrl,
+            category: feed.subreddit,
+            feedType: "RSS",
+            }),
+        });
+
+        if (!response.ok) {
+            alert("follow/unfollow에 실패했습니다.");
+            return;
+        }
+
+        // UI 즉시 반영 (낙관적 업데이트)
+        setSubreddit(prev =>
+        prev
+            ? { ...prev, isFollowed: !prev.isFollowed }
+            : prev
+        );
+    }
     const fetchSubreddit = async (sub: string) => {
         setLoading(true);
         setError(null);
@@ -145,7 +175,8 @@ export default function RedditPage() {
                                     )}
                                 </div>
                             </div>
-                            <button className={`follow-btn ${subreddit.isFollowed ? 'following' : ''}`}>
+                            <button  onClick={() => followFeed(subreddit)}
+                                className={`follow-btn ${subreddit.isFollowed ? 'following' : ''}`}>
                                 {subreddit.isFollowed ? 'Following' : 'Follow'}
                             </button>
                         </div>
