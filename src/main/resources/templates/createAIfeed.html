@@ -1,34 +1,58 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <title>AI Feed</title>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content}, ~{::script})}">
 
-    <!-- ❗ static/css/style.css -->
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
-</head>
-<body>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Create AI Feed</h2>
+    </div>
 
-<h1>AI Feed</h1>
+    <form id="ai-feed-form" action="#" method="post" class="mb-4">
+        <div class="mb-3">
+            <label for="feedTitle" class="form-label">Feed Title</label>
+            <input type="text" class="form-control" id="feedTitle" name="feedTitle" placeholder="Enter feed title" required>
+        </div>
 
-<section id="company-section">
-    <h3>Companies</h3>
-    <div id="company-list"></div>
-</section>
+        <div class="mb-3">
+            <label for="feedDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="feedDescription" name="feedDescription" rows="3" placeholder="Describe your AI feed"></textarea>
+        </div>
 
-<section id="topic-section" style="display:none;">
-    <h3 id="topic-title"></h3>
-    <div id="topic-list"></div>
-</section>
+        <div class="mb-3">
+            <label for="feedKeywords" class="form-label">Keywords</label>
+            <input type="text" class="form-control" id="feedKeywords" name="feedKeywords" placeholder="Comma separated keywords">
+            <div class="form-text">Use keywords to guide AI feed generation.</div>
+        </div>
 
-<section id="result-section" style="display:none;">
-    <h3>Results</h3>
-    <div id="article-list"></div>
-</section>
+        <button type="submit" class="btn btn-primary">Create Feed</button>
+    </form>
 
-<script th:src="@{/js/api.js}"></script>
-<script th:src="@{/js/feed.js}"></script>
+    <div id="result" class="mt-4"></div>
+</div>
 
+<script th:fragment="script">
+    $(document).ready(function () {
+        $('#ai-feed-form').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                title: $('#feedTitle').val(),
+                description: $('#feedDescription').val(),
+                keywords: $('#feedKeywords').val()
+            };
+            // 예시: AJAX로 서버에 요청 보내기
+            $.ajax({
+                url: '/api/create-ai-feed',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    $('#result').html('<div class="alert alert-success">AI Feed created successfully!</div>');
+                },
+                error: function () {
+                    $('#result').html('<div class="alert alert-danger">Failed to create AI Feed.</div>');
+                }
+            });
+        });
+    });
+</script>
 
-</body>
 </html>
