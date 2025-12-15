@@ -2,6 +2,7 @@ package com.feedly.feedlyclonebackend.service
 
 import com.feedly.feedlyclonebackend.dto.*
 import com.feedly.feedlyclonebackend.entity.UserFeed
+import com.feedly.feedlyclonebackend.repository.FeedItemRepository
 import com.feedly.feedlyclonebackend.repository.FeedRepository
 import com.feedly.feedlyclonebackend.repository.PopularFeedRepository
 import com.feedly.feedlyclonebackend.repository.UserFeedRepository
@@ -21,8 +22,7 @@ import java.time.ZoneId
 class FeedService(
     private val userFeedRepository: UserFeedRepository,
     private val popularFeedRepository: PopularFeedRepository,
-    private val newsApiService: NewsApiService,
-    private val feedRepository: FeedRepository
+    private val newsApiService: NewsApiService
 ) {
     private val logger = LoggerFactory.getLogger(FeedService::class.java)
 
@@ -36,6 +36,21 @@ class FeedService(
         // Reddit RSS URL 패턴
         private const val REDDIT_RSS_TEMPLATE = "https://www.reddit.com/r/%s/.rss"
         private const val REDDIT_ICON_URL = "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png"
+    }
+    fun getFeedsByCompany(companyId: Long) =
+        feedRepository.findByCompany(companyId)
+
+    fun getTodayMePosts(userId: Long): List<FeedItem> {
+        val since = LocalDateTime.now().minusDays(30)
+        return feedItemRepository.findUnreadRecentByUser(userId, since)
+    }
+
+    fun markAsRead(postId: Long) {
+        val item = feedItemRepository.findById(postId)
+            .orElseThrow { IllegalArgumentException("Post not found") }
+
+        item.isRead = true
+        feedItemRepository.save(item)
     }
     fun getFeedsByCompany(companyId: Long) =
         feedRepository.findByCompany(companyId)
