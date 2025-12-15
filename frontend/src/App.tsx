@@ -24,7 +24,7 @@ function App() {
                             <Route path="/reddit" element={<RedditPage />} />
                             <Route path="/saved" element={<ReadLaterPage />} />
                             <Route path="/read-later" element={<ReadLaterPage />} />
-                            <Route path="/" element={<Navigate to="/discover" replace />} />
+                             <Route path="/" element={<Navigate to="/login" replace />} /> 
                         </Routes>
                     </Layout>
                 } />
