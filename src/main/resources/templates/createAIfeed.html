@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>AI Feed</title>
+
+    <!-- ❗ static/css/style.css -->
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<h1>AI Feed</h1>
+
+<section id="company-section">
+    <h3>Companies</h3>
+    <div id="company-list"></div>
+</section>
+
+<section id="topic-section" style="display:none;">
+    <h3 id="topic-title"></h3>
+    <div id="topic-list"></div>
+</section>
+
+<section id="result-section" style="display:none;">
+    <h3>Results</h3>
+    <div id="article-list"></div>
+</section>
+
+<script th:src="@{/js/api.js}"></script>
+<script th:src="@{/js/feed.js}"></script>
+
+
+</body>
+</html>
