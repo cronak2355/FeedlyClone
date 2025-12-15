@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../styles/discover.css';
+import { findAllInRenderedTree } from 'react-dom/test-utils';
 
 interface FeedItem {
     title: string;
@@ -33,13 +34,48 @@ export default function DiscoverPage() {
 
     const view = searchParams.get('view') || 'headlines';
 
+    async function followFeed(feed: DiscoveredFeed) {
+        const url = feed.isFollowed
+            ? "http://localhost:8080/discover/unfollow"
+            : "http://localhost:8080/discover/follow";
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+            feedUrl: feed.feedUrl,      // 여기도 siteUrl 말고 feedUrl이 맞을 확률 높음
+            title: feed.title,
+            description: feed.description,
+            faviconUrl: feed.faviconUrl,
+            category: feed.category,
+            feedType: "RSS",
+            }),
+        });
+
+        if (!response.ok) {
+            alert("follow/unfollow에 실패했습니다.");
+            return;
+        }
+
+        // UI 즉시 반영 (낙관적 업데이트)
+        setFeeds(prev =>
+            prev.map(f =>
+            f.feedUrl === feed.feedUrl ? { ...f, isFollowed: !feed.isFollowed } : f
+            )
+        );
+    }
+
     useEffect(() => {
         fetchData();
         fetchSavedUrls();
     }, [view]);
-
+    //뉴스에 저장된 내용들을 비동기로 받아옴.
     const fetchSavedUrls = async () => {
         try {
+            //해당 url로 GET 요청을 보냄
+            //credentials = include인 이유는 로그인 정보를 쿠키에서 저장하기 때문에,
+            //쿠키를 포함해서 보내줌
             const response = await fetch('http://localhost:8080/api/saved', {
                 credentials: 'include',
             });
@@ -267,8 +303,9 @@ export default function DiscoverPage() {
                                                     <i className="bi bi-people"></i> {feed.subscriberCount.toLocaleString()}
                                                 </span>
                                             )}
-                                            <button className={`follow-btn ${feed.isFollowed ? 'following' : ''}`}>
-                                                {feed.isFollowed ? 'Following' : 'Follow'}
+                                            <button  onClick={() => followFeed(feed)}
+                                                     className={`follow-btn ${feed.isFollowed ? 'following' : ''}`}>
+                                            {feed.isFollowed ? 'Following' : 'Follow'}
                                             </button>
                                         </div>
                                     </div>

@@ -48,7 +48,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")  // 2025년 기준 최신 안정 버전    implementation("io.github.cdimascio:dotenv-java:3.0.0")
-
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 kotlin {

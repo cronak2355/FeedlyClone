@@ -9,6 +9,7 @@ export default function Layout({ children }: LayoutProps) {
     const location = useLocation();
 
     const isActive = (path: string) => location.pathname === path;
+    const isActiveStartsWith = (path: string) => location.pathname.startsWith(path);
 
     return (
         <div className="app-container">
@@ -20,19 +21,21 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
 
                 <nav className="sidebar-nav">
-                    <Link to="/discover" className={`sidebar-item ${isActive('/discover') ? 'active' : ''}`}>
+                    <Link to="/today" className={`sidebar-item ${isActiveStartsWith('/today') ? 'active' : ''}`}>
+                        <i className="bi bi-sun"></i>
+                        <span>Today</span>
+                    </Link>
+
+                    {/* Follow Sources - 클릭하면 페이지로 이동 */}
+                    <Link to="/follow-sources" className={`sidebar-item ${isActiveStartsWith('/follow-sources') ? 'active' : ''}`}>
                         <i className="bi bi-compass"></i>
-                        <span>Explore</span>
+                        <span>Follow Sources</span>
                     </Link>
 
-                    <Link to="/discover/news" className={`sidebar-item ${isActive('/discover/news') ? 'active' : ''}`}>
-                        <i className="bi bi-newspaper"></i>
-                        <span>News</span>
-                    </Link>
-
-                    <Link to="/discover/reddit" className={`sidebar-item ${isActive('/discover/reddit') ? 'active' : ''}`}>
-                        <i className="bi bi-reddit"></i>
-                        <span>Reddit</span>
+                    {/* Search */}
+                    <Link to="/search" className={`sidebar-item ${isActiveStartsWith('/search') ? 'active' : ''}`}>
+                        <i className="bi bi-search"></i>
+                        <span>Search</span>
                     </Link>
 
                     <Link to="/discover/createAIfeed" className={`sidebar-item ${isActive('/discover/createAIfeed') ? 'active' : ''}`}>
@@ -43,12 +46,43 @@ export default function Layout({ children }: LayoutProps) {
 
                 <div className="nav-section-title">Library</div>
 
-                <nav className="sidebar-nav">
                     <Link to="/saved" className={`sidebar-item ${isActive('/saved') ? 'active' : ''}`}>
                         <i className="bi bi-bookmark"></i>
                         <span>Read Later</span>
                     </Link>
                 </nav>
+
+                <div className="nav-section-title">Feeds</div>
+                <nav className="sidebar-nav">
+                    <div className="sidebar-item text-muted small">
+                        <i className="bi bi-plus"></i>
+                        <span>Add Content</span>
+                    </div>
+                </nav>
+
+                <div className="nav-section-title">Boards</div>
+                <nav className="sidebar-nav">
+                    <div className="sidebar-item text-muted small">
+                        <i className="bi bi-plus"></i>
+                        <span>Create Board</span>
+                    </div>
+                </nav>
+
+                {/* Footer Links */}
+                <div className="sidebar-footer">
+                    <a href="#" className="sidebar-item text-muted small">
+                        <i className="bi bi-gear"></i>
+                        <span>Integrations & API</span>
+                    </a>
+                    <a href="#" className="sidebar-item text-muted small">
+                        <i className="bi bi-pencil"></i>
+                        <span>Blog</span>
+                    </a>
+                    <a href="#" className="sidebar-item text-muted small">
+                        <i className="bi bi-question-circle"></i>
+                        <span>Learn & Get Support</span>
+                    </a>
+                </div>
             </aside>
 
             {/* Main Content */}
