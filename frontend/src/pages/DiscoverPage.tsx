@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '../styles/discover.css';
-import { findAllInRenderedTree } from 'react-dom/test-utils';
 
 interface FeedItem {
     title: string;

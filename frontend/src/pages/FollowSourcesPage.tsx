@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import '../styles/discover.css';
+import '/src/styles/discover.css';
 
 interface DiscoveredFeed {
     feedUrl: string;
@@ -43,7 +43,39 @@ export default function FollowSourcesPage() {
     const [activeTab, setActiveTab] = useState<'feeds' | 'reddit'>(
         (searchParams.get('tab') as 'feeds' | 'reddit') || 'feeds'
     );
+    async function followFeed(feed: DiscoveredFeed) {
+        const url = feed.isFollowed
+            ? "http://localhost:8080/discover/unfollow"
+            : "http://localhost:8080/discover/follow";
 
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+            feedUrl: feed.feedUrl,      // 여기도 siteUrl 말고 feedUrl이 맞을 확률 높음
+            title: feed.title,
+            description: feed.description,
+            faviconUrl: feed.faviconUrl,
+            category: feed.category,
+            feedType: "RSS",
+            }),
+        });
+
+        if (!response.ok) {
+            alert("follow/unfollow에 실패했습니다.");
+            return;
+        }
+
+        // UI 즉시 반영 (낙관적 업데이트)
+        setFeeds(prevFeeds => 
+            prevFeeds.map(f => 
+                f.feedUrl === feed.feedUrl 
+                    ? { ...f, isFollowed: !f.isFollowed } 
+                    : f
+            )
+        );
+    }
     // Feeds
     const [feeds, setFeeds] = useState<DiscoveredFeed[]>([]);
     const [feedsLoading, setFeedsLoading] = useState(true);
@@ -68,7 +100,7 @@ export default function FollowSourcesPage() {
         setActiveTab(tab);
         setSearchParams({ tab });
     };
-
+    
     const fetchFeeds = async () => {
         setFeedsLoading(true);
         try {
@@ -176,6 +208,7 @@ export default function FollowSourcesPage() {
                                                 : <button className="follow-btn" onClick={() => handleFollow(site)}>Follow</button>
                                         )}
                                         {!site.hasFeed && <span className="no-rss">No RSS</span>}
+                                        
                                     </div>
                                 ))}
                             </div>
@@ -195,6 +228,11 @@ export default function FollowSourcesPage() {
                                                 <span className="feed-url">{feed.siteUrl}</span>
                                             </div>
                                         </div>
+                                        {feed.feedUrl && (
+                                            followedUrls.has(feed.feedUrl) 
+                                                ? <span className="followed-badge"><i className="bi bi-check"></i></span>
+                                                : <button className="follow-btn" onClick={() => followFeed(feed)}>{feed.isFollowed ? 'Unfollow' : 'Follow'}</button>
+                                        )}
                                         {feed.description && <p className="feed-description">{feed.description}</p>}
                                     </div>
                                 ))}
