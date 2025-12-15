@@ -23,12 +23,8 @@ class SecurityConfig {
         requestHandler.setCsrfRequestAttributeName("_csrf")
 
         http
-            // 1. CSRF 설정 (기존 유지)
-            .csrf { csrf ->
-                csrf
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .csrfTokenRequestHandler(requestHandler)
-            }
+            // 1. CSRF 비활성화 (개발 테스트용)
+            .csrf { it.disable() }
 
             // 2. HTTP Basic 비활성화 (폼 로그인만 사용할 경우 권장)
             .httpBasic { it.disable() }
@@ -38,13 +34,13 @@ class SecurityConfig {
                 auth
                     // 정적 자원 및 로그인/회원가입 페이지는 누구나 접근 가능
                     .requestMatchers(
-                        "/account/signin",
-                        "/account/signup",
+                        "/signup",
                         "/login",
+                        "/api/**",  // React API 엔드포인트
                         "/css/**",
                         "/js/**",
                         "/images/**",
-                        "/favicon.ico", // 아이콘 요청도 허용하는 것이 좋음
+                        "/favicon.ico",
                         "/"
                     ).permitAll()
 
@@ -55,9 +51,9 @@ class SecurityConfig {
             // 4. 폼 로그인 설정 (비활성화 코드 제거)
             .formLogin { form ->
                 form
-                    .loginPage("/account/signin")   // 커스텀 로그인 페이지 경로
+                    .loginPage("/login")   // 커스텀 로그인 페이지 경로
                     .loginProcessingUrl("/login")   // HTML Form의 action 경로
-                    .usernameParameter("email")     // Form의 input name="email"
+                    .usernameParameter("username")     // Form의 input name="username"
                     .passwordParameter("password")  // Form의 input name="password"
                     .defaultSuccessUrl("/", true)   // 로그인 성공 시 이동할 경로
                     .permitAll()                    // 로그인 페이지 자체는 접근 허용

@@ -22,7 +22,7 @@ class AccountController
     @GetMapping("/signup")
     fun signupPage(@ModelAttribute("signupForm") signupForm: SignupForm, model: Model): String
     {
-        println("회원가입")
+        println("=== GET /account/signup 호출됨 ===")
         return "signup"
     }
 
@@ -31,20 +31,24 @@ class AccountController
         @ModelAttribute @Valid signupForm: SignupForm,
         bindingResult: BindingResult
     ): String {
-        println("${signupForm.email} ${signupForm.password}")
+        println("=== POST /account/signup 호출됨 ===")
+        println("이메일: ${signupForm.email}, 비밀번호 길이: ${signupForm.password.length}")
 
         // 검증 실패 시
         if (bindingResult.hasErrors()) {
+            println("검증 실패: ${bindingResult.allErrors}")
             return "signup"
         }
 
-        // TODO: 회원가입 처리 로직
-        if (accountService.signup(signupForm.email, signupForm.password, bindingResult) == null)
-        {
+        // 회원가입 처리
+        val result = accountService.signup(signupForm.email, signupForm.password, bindingResult)
+        if (result == null) {
+            println("회원가입 실패")
             return "signup"
         }
 
-        return "redirect:/account/signin"
+        println("회원가입 성공: ${result.email}")
+        return "redirect:/login"
     }
     @GetMapping("/signin")
     fun signinPage(): String {

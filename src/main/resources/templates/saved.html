@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content}, ~{::script})}">
+
+<div th:fragment="content">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Read Later</h2>
+        <div class="text-secondary">
+            <span th:text="${readCount}">0</span> articles archived
+        </div>
+    </div>
+
+    <!-- Article List -->
+    <div th:unless="${#lists.isEmpty(savedArticles)}" class="article-list">
+
+        <div class="article-item" th:each="article : ${savedArticles}">
+            <!-- Thumbnail -->
+            <img th:if="${article.thumbnailUrl != null}" th:src="${article.thumbnailUrl}" class="article-thumb"
+                alt="thumbnail" onerror="this.style.display='none'">
+            <div th:unless="${article.thumbnailUrl != null}"
+                class="article-thumb d-flex align-items-center justify-content-center bg-light text-secondary">
+                <i class="bi bi-image fs-1 opacity-25"></i>
+            </div>
+
+            <!-- Content -->
+            <div class="article-content">
+                <div>
+                    <div class="article-meta">
+                        <span class="article-source" th:text="${article.siteName ?: 'Saved Article'}">Source</span>
+                        <span>•</span>
+                        <span th:text="${#temporals.format(article.savedAt, 'MMM dd, HH:mm')}">Date</span>
+                    </div>
+
+                    <a th:href="${article.articleUrl}" target="_blank" class="text-decoration-none">
+                        <h3 class="article-title" th:text="${article.title}">Title</h3>
+                    </a>
+
+                    <p class="article-desc" th:text="${article.description}">Description</p>
+                </div>
+
+                <div class="article-actions">
+                    <!-- Toggle Read/Unread or Remove -->
+                    <button class="action-btn active" title="Saved">
+                        <i class="bi bi-bookmark-check-fill text-feedly"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(savedArticles)}" class="empty-state">
+        <i class="bi bi-bookmark"></i>
+        <h4>No stories saved yet</h4>
+        <p>Articles you save for later will appear here.</p>
+        <a href="/discover/news" class="btn btn-primary mt-3">Explore News</a>
+    </div>
+
+</div>
+
+<script th:fragment="script">
+    // Add specific scripts for saved page if needed
+</script>
+
+</html>
