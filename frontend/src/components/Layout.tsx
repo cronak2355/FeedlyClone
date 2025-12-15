@@ -34,6 +34,11 @@ export default function Layout({ children }: LayoutProps) {
                         <i className="bi bi-reddit"></i>
                         <span>Reddit</span>
                     </Link>
+
+                    <Link to="/discover/createAIfeed" className={`sidebar-item ${isActive('/discover/createAIfeed') ? 'active' : ''}`}>
+                        <i className="bi bi-CreateAIFeedPage"></i>
+                        <span>CreateAIFeed</span>
+                    </Link>
                 </nav>
 
                 <div className="nav-section-title">Library</div>

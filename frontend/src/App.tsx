@@ -5,6 +5,7 @@ import SignupPage from './pages/SignupPage.tsx';
 import DiscoverPage from './pages/DiscoverPage.tsx';
 import NewsPage from './pages/NewsPage.tsx';
 import RedditPage from './pages/RedditPage.tsx';
+import CreateAIFeedAPI from './Pages/CreateAIFeedAPI.tsx';
 import ReadLaterPage from './pages/ReadLaterPage.tsx';
 import './App.css';
 
@@ -20,6 +21,8 @@ function App() {
                             <Route path="/discover" element={<DiscoverPage />} />
                             <Route path="/discover/news" element={<NewsPage />} />
                             <Route path="/discover/reddit" element={<RedditPage />} />
+                            <Route path="/discover/createAIfeed" element={<CreateAIFeedAPI />} />
+                            <Route path="/createAIfeed" element={<CreateAIFeedAPI />} />
                             <Route path="/news" element={<NewsPage />} />
                             <Route path="/reddit" element={<RedditPage />} />
                             <Route path="/saved" element={<ReadLaterPage />} />
