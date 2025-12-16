@@ -36,27 +36,28 @@ export default function SearchPage() {
     }, [query]);
 
     const fetchNews = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams();
-            params.set('view', 'headlines');
-            if (query) params.set('query', query);
-            if (category) params.set('category', category.toLowerCase());
+    setLoading(true);
+    try {
+        const params = new URLSearchParams();
+        if (query) params.set('query', query);
+        if (category) params.set('category', category.toLowerCase());
+        // view=headlines 제거! query가 있으면 articles 반환됨
 
-            const response = await fetch(`http://localhost:8080/api/discover?${params}`, {
-                credentials: 'include',
-            });
+        const response = await fetch(`http://localhost:8080/api/discover?${params}`, {
+            credentials: 'include',
+        });
 
-            if (response.ok) {
-                const data = await response.json();
-                setArticles(data.headlines || []);
-            }
-        } catch (err) {
-            console.error('Fetch error:', err);
-        } finally {
-            setLoading(false);
+        if (response.ok) {
+            const data = await response.json();
+            // query가 있으면 articles, 없으면 headlines
+            setArticles(query ? (data.articles || []) : (data.headlines || []));
         }
-    };
+    } catch (err) {
+        console.error('Fetch error:', err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     const fetchSavedUrls = async () => {
         try {
