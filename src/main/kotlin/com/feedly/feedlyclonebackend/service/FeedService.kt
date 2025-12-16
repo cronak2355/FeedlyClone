@@ -286,16 +286,20 @@ class FeedService(
             val input = SyndFeedInput()
             val feed: SyndFeed = input.build(XmlReader(connection))
 
-            val posts = feed.entries.take(MAX_ITEMS_PREVIEW).map { entry ->
+            val posts = feed.entries.take(25).map { entry ->
+                // Reddit RSS에서 이미지 추출
+                val thumbnail = extractRedditThumbnail(entry)
+                
                 RedditPost(
                     title = entry.title ?: "제목 없음",
                     link = entry.link ?: "",
-                    author = entry.author ?: "unknown",
+                    author = entry.author?.removePrefix("/u/") ?: "unknown",
                     subreddit = cleanSubreddit,
                     publishedDate = entry.publishedDate?.toInstant()
                         ?.atZone(ZoneId.systemDefault())
                         ?.toLocalDateTime(),
-                    selfText = entry.description?.value?.let { stripHtml(it).take(300) }
+                    selfText = entry.description?.value?.let { stripHtml(it).take(300) },
+                    thumbnailUrl = thumbnail
                 )
             }
 
@@ -310,10 +314,34 @@ class FeedService(
                 posts = posts,
                 isFollowed = isFollowed
             ).also {
-                logger.info("Successfully parsed Reddit feed: r/$cleanSubreddit")
+                logger.info("Successfully parsed Reddit feed: r/$cleanSubreddit with ${posts.size} posts")
             }
         } catch (e: Exception) {
             logger.error("Failed to parse Reddit feed r/$subreddit: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Reddit RSS에서 썸네일 이미지 추출
+     */
+    private fun extractRedditThumbnail(entry: com.rometools.rome.feed.synd.SyndEntry): String? {
+        // 1. 먼저 enclosure에서 이미지 찾기
+        entry.enclosures?.firstOrNull { it.type?.startsWith("image") == true }?.url?.let {
+            return it
+        }
+
+        // 2. content/description에서 이미지 추출
+        val content = entry.description?.value ?: entry.contents?.firstOrNull()?.value ?: return null
+        
+        return try {
+            val doc = Jsoup.parse(content)
+            // Reddit RSS는 보통 썸네일을 <a href><img src></a> 형태로 포함
+            doc.select("img[src]").firstOrNull()?.attr("src")?.takeIf { 
+                it.isNotBlank() && !it.contains("reddit.com/static") 
+            }
+        } catch (e: Exception) {
+            logger.debug("Failed to extract thumbnail: ${e.message}")
             null
         }
     }
