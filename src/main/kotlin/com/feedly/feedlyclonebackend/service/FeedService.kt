@@ -1,6 +1,7 @@
 package com.feedly.feedlyclonebackend.service
 
 import com.feedly.feedlyclonebackend.dto.*
+import com.feedly.feedlyclonebackend.entity.Feed
 import com.feedly.feedlyclonebackend.entity.UserFeed
 import com.feedly.feedlyclonebackend.repository.FeedItemRepository
 import com.feedly.feedlyclonebackend.repository.FeedRepository
@@ -39,12 +40,20 @@ class FeedService(
         private const val REDDIT_RSS_TEMPLATE = "https://www.reddit.com/r/%s/.rss"
         private const val REDDIT_ICON_URL = "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png"
     }
-    fun getFeedsByCompany(companyId: Long) =
-        feedRepository.findByCompany(companyId)
+    fun getFeedsByCompany(companyId: Long): List<Feed> {
+        return feedRepository.findByCompanyId(companyId)
+    }
+    fun feedItems(feedId: Long): List<FeedItemDto> {
+        return feedItemRepository
+            .findByFeedIdOrderByPublishedAtDesc(feedId)
+            .map { it.toDto() }
+    }
 
-    fun getTodayMePosts(userId: Long): List<FeedItem> {
+    fun getTodayMePosts(userId: Long): List<FeedItemDto> {
         val since = LocalDateTime.now().minusDays(30)
-        return feedItemRepository.findUnreadRecentByUser(userId, since)
+        return feedItemRepository
+            .findTodayItems(userId, since)
+            .map { it.toDto() }
     }
 
     fun markAsRead(postId: Long) {
@@ -92,7 +101,7 @@ class FeedService(
             // 3. 통합 (중복 제거)
             val allFeeds = (newsApiFeeds + dbDiscoveredFeeds)
                 .distinctBy { it.feedUrl }
-            
+
             DiscoverResult(
                 query = query,
                 feeds = allFeeds,
@@ -206,7 +215,7 @@ class FeedService(
     fun getAllCategories(): List<String> {
         val newsApiCategories = newsApiService.getAllCategories()
         val dbCategories = popularFeedRepository.findAllCategories()
-        
+
         return (newsApiCategories + dbCategories)
             .map { it.replaceFirstChar { c -> c.uppercase() } }
             .distinct()
@@ -272,7 +281,7 @@ class FeedService(
     fun parseRedditFeed(subreddit: String): SubredditFeed? {
         val cleanSubreddit = subreddit.removePrefix("r/").trim()
         val feedUrl = REDDIT_RSS_TEMPLATE.format(cleanSubreddit)
-        
+
         logger.debug("Parsing Reddit feed: $feedUrl")
 
         return try {
@@ -358,7 +367,7 @@ class FeedService(
 
         return userFeedRepository.save(userFeed).also {
             logger.info("Successfully followed feed: ${it.feedTitle}")
-            
+
             // TODO: 주기적 피드 업데이트 스케줄러에 등록
             // scheduleFeedUpdate(it)
         }
@@ -370,9 +379,9 @@ class FeedService(
     @Transactional
     fun unfollowFeed(feedUrl: String, userId: Long = DEFAULT_USER_ID): Boolean {
         logger.debug("Unfollowing feed: $feedUrl for user: $userId")
-        
+
         val deleted = userFeedRepository.deleteByUserIdAndFeedUrl(userId, feedUrl)
-        
+
         return (deleted > 0).also {
             if (it) logger.info("Successfully unfollowed feed: $feedUrl")
             else logger.warn("Feed not found for unfollow: $feedUrl")
@@ -425,16 +434,16 @@ class FeedService(
 
     private fun extractThumbnail(entry: com.rometools.rome.feed.synd.SyndEntry): String? {
         // 미디어 모듈에서 썸네일 추출 시도
-        return entry.enclosures?.firstOrNull { 
-            it.type?.startsWith("image") == true 
+        return entry.enclosures?.firstOrNull {
+            it.type?.startsWith("image") == true
         }?.url
     }
 
     // === 주기적 피드 업데이트 (주석 처리 - 추후 구현) ===
-    
+
     /**
      * TODO: 피드 어그리게이터 - 주기적 업데이트 로직
-     * 
+     *
      * @Scheduled(fixedRate = 300000) // 5분마다
      * fun updateAllFeeds() {
      *     val activeFeeds = userFeedRepository.findAllByIsActiveTrue()
