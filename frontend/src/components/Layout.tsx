@@ -26,26 +26,25 @@ export default function Layout({ children }: LayoutProps) {
                         <span>Today</span>
                     </Link>
 
-                    {/* Follow Sources - 클릭하면 페이지로 이동 */}
                     <Link to="/follow-sources" className={`sidebar-item ${isActiveStartsWith('/follow-sources') ? 'active' : ''}`}>
                         <i className="bi bi-compass"></i>
                         <span>Follow Sources</span>
                     </Link>
 
-                    {/* Search */}
                     <Link to="/search" className={`sidebar-item ${isActiveStartsWith('/search') ? 'active' : ''}`}>
                         <i className="bi bi-search"></i>
                         <span>Search</span>
                     </Link>
 
                     <Link to="/discover/createAIfeed" className={`sidebar-item ${isActive('/discover/createAIfeed') ? 'active' : ''}`}>
-                        <i className="bi bi-CreateAIFeedPage"></i>
+                        <i className="bi bi-robot"></i>
                         <span>CreateAIFeed</span>
                     </Link>
                 </nav>
 
                 <div className="nav-section-title">Library</div>
 
+                <nav className="sidebar-nav">
                     <Link to="/saved" className={`sidebar-item ${isActive('/saved') ? 'active' : ''}`}>
                         <i className="bi bi-bookmark"></i>
                         <span>Read Later</span>
