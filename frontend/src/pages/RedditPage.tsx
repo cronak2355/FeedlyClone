@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import '../styles/discover.css';
 
 interface RedditPost {
@@ -8,6 +8,7 @@ interface RedditPost {
     subreddit: string;
     publishedDate?: string;
     selfText?: string;
+    thumbnailUrl?: string;
 }
 
 interface SubredditFeed {
@@ -31,63 +32,62 @@ export default function RedditPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedSub, setSelectedSub] = useState('programming');
+    const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+    const fetchSubreddit = useCallback(async (sub: string) => {
+        if (!sub) return;
+
+        setLoading(true);
+        setError(null);
+        setSubreddit(null);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            const response = await fetch(`http://localhost:8080/api/reddit?subreddit=${encodeURIComponent(sub)}`, {
+                credentials: 'include',
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // subreddit 필드가 없으면 루트 객체를 사용
+            const feedData = data.subreddit || data;
+
+            if (!feedData || !feedData.posts) {
+                throw new Error('Invalid response format');
+            }
+
+            setSubreddit(feedData);
+            setImageErrors(new Set());
+        } catch (err) {
+            console.error('Fetch error:', err);
+            if (err instanceof Error && err.name === 'AbortError') {
+                setError('요청 시간이 초과되었습니다. 다시 시도해주세요.');
+            } else {
+                setError('서브레딧을 불러오는데 실패했습니다.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         if (selectedSub) {
             fetchSubreddit(selectedSub);
         }
-    }, [selectedSub]);
-    async function followFeed(feed: SubredditFeed) {
-        const url = feed.isFollowed
-            ? "http://localhost:8080/discover/unfollow"
-            : "http://localhost:8080/discover/follow";
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-            feedUrl: feed.feedUrl,      // 여기도 siteUrl 말고 feedUrl이 맞을 확률 높음
-            title: feed.title,
-            description: feed.description,
-            faviconUrl: feed.iconUrl,
-            category: feed.subreddit,
-            feedType: "RSS",
-            }),
-        });
-
-        if (!response.ok) {
-            alert("follow/unfollow에 실패했습니다.");
-            return;
-        }
-
-        // UI 즉시 반영 (낙관적 업데이트)
-        setSubreddit(prev =>
-        prev
-            ? { ...prev, isFollowed: !prev.isFollowed }
-            : prev
-        );
-    }
-    const fetchSubreddit = async (sub: string) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`http://localhost:8080/api/reddit?subreddit=${sub}`, {
-                credentials: 'include',
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch');
-
-            const data = await response.json();
-            setSubreddit(data.subreddit);
-        } catch (err) {
-            console.error('Fetch error:', err);
-            setError('서브레딧을 불러오는데 실패했습니다.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [selectedSub, fetchSubreddit]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -98,15 +98,33 @@ export default function RedditPage() {
         }
     };
 
+    const handleImageError = (postLink: string) => {
+        setImageErrors(prev => new Set(prev).add(postLink));
+    };
+
     const formatDate = (dateString?: string) => {
         if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ko-KR', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleDateString('ko-KR', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch {
+            return '';
+        }
+    };
+
+    const isValidThumbnail = (url?: string): boolean => {
+        if (!url) return false;
+        // 유효한 이미지 URL인지 확인
+        return url.startsWith('http') &&
+            !url.includes('self') &&
+            !url.includes('default') &&
+            !url.includes('nsfw');
     };
 
     return (
@@ -140,6 +158,7 @@ export default function RedditPage() {
                             key={sub}
                             className={`category-btn ${selectedSub === sub ? 'active' : ''}`}
                             onClick={() => setSelectedSub(sub)}
+                            disabled={loading}
                         >
                             r/{sub}
                         </button>
@@ -156,8 +175,11 @@ export default function RedditPage() {
                     </div>
                 ) : error ? (
                     <div className="error-container">
+                        <i className="bi bi-exclamation-triangle" style={{ fontSize: '2rem', color: '#dc3545' }}></i>
                         <p>{error}</p>
-                        <button onClick={() => fetchSubreddit(selectedSub)} className="btn btn-primary">다시 시도</button>
+                        <button onClick={() => fetchSubreddit(selectedSub)} className="btn btn-primary">
+                            다시 시도
+                        </button>
                     </div>
                 ) : subreddit ? (
                     <>
@@ -167,9 +189,12 @@ export default function RedditPage() {
                                     src={subreddit.iconUrl || 'https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png'}
                                     alt=""
                                     className="subreddit-icon"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png';
+                                    }}
                                 />
                                 <div>
-                                    <h2 className="subreddit-title">{subreddit.title}</h2>
+                                    <h2 className="subreddit-title">{subreddit.title || `r/${subreddit.subreddit}`}</h2>
                                     {subreddit.description && (
                                         <p className="subreddit-description">{subreddit.description}</p>
                                     )}
@@ -181,28 +206,53 @@ export default function RedditPage() {
                             </button>
                         </div>
 
-                        <div className="headlines-list">
-                            {subreddit.posts?.map((post, index) => (
-                                <article key={index} className="headline-item reddit-post">
-                                    <div className="headline-content">
-                                        <a href={post.link} target="_blank" rel="noopener noreferrer" className="headline-title">
-                                            {post.title}
-                                        </a>
-                                        {post.selfText && (
-                                            <p className="headline-description">{post.selfText}</p>
+                        {subreddit.posts && subreddit.posts.length > 0 ? (
+                            <div className="headlines-list">
+                                {subreddit.posts.map((post, index) => (
+                                    <article key={`${post.link}-${index}`} className="headline-item reddit-post">
+                                        {/* 썸네일 이미지 */}
+                                        {isValidThumbnail(post.thumbnailUrl) && !imageErrors.has(post.link) && (
+                                            <div className="headline-thumbnail">
+                                                <img
+                                                    src={post.thumbnailUrl}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    onError={() => handleImageError(post.link)}
+                                                />
+                                            </div>
                                         )}
-                                        <div className="headline-meta">
-                                            <span className="author">u/{post.author}</span>
-                                            {post.publishedDate && <span className="date">{formatDate(post.publishedDate)}</span>}
+                                        <div className="headline-content">
+                                            <a
+                                                href={post.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="headline-title"
+                                            >
+                                                {post.title}
+                                            </a>
+                                            {post.selfText && (
+                                                <p className="headline-description">{post.selfText}</p>
+                                            )}
+                                            <div className="headline-meta">
+                                                <span className="author">u/{post.author}</span>
+                                                {post.publishedDate && (
+                                                    <span className="date">{formatDate(post.publishedDate)}</span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="empty-state">
+                                <i className="bi bi-inbox"></i>
+                                <p>이 서브레딧에 게시물이 없습니다</p>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <div className="empty-state">
-                        <i className="bi bi-reddit"></i>
+                        <i className="bi bi-reddit" style={{ color: '#FF4500' }}></i>
                         <p>서브레딧을 선택하세요</p>
                     </div>
                 )}
@@ -210,3 +260,4 @@ export default function RedditPage() {
         </>
     );
 }
+

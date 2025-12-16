@@ -27,7 +27,6 @@ export default function SignupPage() {
             const data = await response.json();
 
             if (data.success) {
-                alert('회원가입 성공! 로그인 페이지로 이동합니다.');
                 navigate('/login');
             } else {
                 setError(data.message || '회원가입에 실패했습니다.');
