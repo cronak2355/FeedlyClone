@@ -13,17 +13,39 @@ interface FeedItem {
 
 export default function TodayPage() {
     const [activeTab, setActiveTab] = useState<'me' | 'explore'>('me');
+    const [myItems, setMyItems] = useState<FeedItem[]>([]);
     const [headlines, setHeadlines] = useState<FeedItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [savedUrls, setSavedUrls] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        if (activeTab === 'explore') {
+        if (activeTab === 'me') {
+            fetchMyFeedItems();
+        } else {
             fetchHeadlines();
         }
         fetchSavedUrls();
     }, [activeTab]);
 
+    // 팔로우한 피드의 최신 글
+    const fetchMyFeedItems = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:8080/api/discover?view=myfeed', {
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setMyItems(data.items || []);
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Explore 탭
     const fetchHeadlines = async () => {
         setLoading(true);
         try {
@@ -46,8 +68,7 @@ export default function TodayPage() {
             const response = await fetch('http://localhost:8080/api/saved', { credentials: 'include' });
             if (response.ok) {
                 const data = await response.json();
-                const urls = new Set<string>(data.articles?.map((a: { url: string }) => a.url) || []);
-                setSavedUrls(urls);
+                setSavedUrls(new Set<string>(data.articles?.map((a: { url: string }) => a.url) || []));
             }
         } catch (err) {
             console.error('Fetch saved error:', err);
@@ -94,11 +115,13 @@ export default function TodayPage() {
         });
     };
 
+    const currentItems = activeTab === 'me' ? myItems : headlines;
+
     return (
-        <>
+        <div className="today-page">
             <header className="discover-header">
                 <div className="header-top">
-                    <h1>Today</h1>
+                    <h1><i className="bi bi-sun me-2"></i>Today</h1>
                     <span className="header-subtitle">The insights you need to keep ahead</span>
                 </div>
 
@@ -119,84 +142,77 @@ export default function TodayPage() {
             </header>
 
             <main className="discover-content">
-                {activeTab === 'me' && (
-                    <div className="today-empty-state">
-                        <div className="today-illustration">
-                            <div className="today-card">
-                                <span className="today-card-label">Today</span>
-                                <div className="today-card-content">
-                                    <div className="today-card-line"></div>
-                                    <div className="today-card-line short"></div>
-                                    <div className="today-card-line"></div>
-                                </div>
-                            </div>
-                            <div className="today-avatar">
-                                <i className="bi bi-person-circle"></i>
-                            </div>
-                        </div>
-
-                        <h2>Personalize your Feedly</h2>
-                        <p className="text-secondary">
-                            The most interesting articles published by the<br />
-                            feeds you personally follow will be here.
-                        </p>
-                        <a href="/discover" className="btn btn-primary">Add articles</a>
+                {loading ? (
+                    <div className="loading-container">
+                        <div className="spinner"></div>
+                        <p>Loading...</p>
                     </div>
-                )}
-
-                {activeTab === 'explore' && (
+                ) : currentItems.length === 0 ? (
+                    <div className="today-empty-state">
+                        {activeTab === 'me' ? (
+                            <>
+                                <i className="bi bi-rss" style={{ fontSize: '3rem', color: 'var(--primary-color)' }}></i>
+                                <h2>Personalize your Feedly</h2>
+                                <p className="text-secondary">
+                                    팔로우한 피드의 최신 글이 여기에 표시됩니다.
+                                </p>
+                                <a href="/follow-sources" className="btn btn-primary">피드 추가하기</a>
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-newspaper" style={{ fontSize: '3rem' }}></i>
+                                <p>뉴스가 없습니다</p>
+                            </>
+                        )}
+                    </div>
+                ) : (
                     <div className="headlines-list">
                         <p className="section-subtitle">
-                            <i className="bi bi-lightning-fill text-warning me-1"></i>
-                            Top Headlines
+                            {activeTab === 'me' ? (
+                                <><i className="bi bi-rss text-success me-1"></i>팔로우한 피드 ({myItems.length})</>
+                            ) : (
+                                <><i className="bi bi-lightning-fill text-warning me-1"></i>Top Headlines</>
+                            )}
                         </p>
-                        {loading ? (
-                            <div className="loading-container">
-                                <div className="spinner"></div>
-                                <p>Loading...</p>
-                            </div>
-                        ) : headlines.length ? (
-                            headlines.slice(0, 20).map((item, index) => (
-                                <article key={index} className="headline-item">
-                                    <span className="headline-rank">{index + 1}</span>
-                                    {item.thumbnailUrl && (
-                                        <img
-                                            src={item.thumbnailUrl}
-                                            alt=""
-                                            className="headline-thumbnail"
-                                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                                        />
+                        {currentItems.map((item, index) => (
+                            <article key={index} className="headline-item">
+                                {item.thumbnailUrl && (
+                                    <img
+                                        src={item.thumbnailUrl}
+                                        alt=""
+                                        className="headline-thumbnail"
+                                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                                    />
+                                )}
+                                <div className="headline-content">
+                                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="headline-title">
+                                        {item.title}
+                                    </a>
+                                    {item.description && (
+                                        <p className="headline-description">{item.description}</p>
                                     )}
-                                    <div className="headline-content">
-                                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="headline-title">
-                                            {item.title}
-                                        </a>
-                                        {item.description && (
-                                            <p className="headline-description">{item.description}</p>
+                                    <div className="headline-meta">
+                                        {item.sourceName && (
+                                            <span className={`source ${item.sourceName.startsWith('r/') ? 'reddit-source' : ''}`}>
+                                                {item.sourceName}
+                                            </span>
                                         )}
-                                        <div className="headline-meta">
-                                            {item.sourceName && <span className="source">{item.sourceName}</span>}
-                                            {item.publishedDate && <span className="date">{formatDate(item.publishedDate)}</span>}
-                                            <button
-                                                className={`bookmark-btn ${savedUrls.has(item.link) ? 'saved' : ''}`}
-                                                onClick={() => handleSaveArticle(item)}
-                                                title="나중에 보기"
-                                            >
-                                                <i className={`bi ${savedUrls.has(item.link) ? 'bi-bookmark-fill' : 'bi-bookmark'}`}></i>
-                                            </button>
-                                        </div>
+                                        {item.publishedDate && (
+                                            <span className="date">{formatDate(item.publishedDate)}</span>
+                                        )}
+                                        <button
+                                            className={`bookmark-btn ${savedUrls.has(item.link) ? 'saved' : ''}`}
+                                            onClick={() => handleSaveArticle(item)}
+                                        >
+                                            <i className={`bi ${savedUrls.has(item.link) ? 'bi-bookmark-fill' : 'bi-bookmark'}`}></i>
+                                        </button>
                                     </div>
-                                </article>
-                            ))
-                        ) : (
-                            <div className="empty-state">
-                                <i className="bi bi-newspaper"></i>
-                                <p>No headlines available</p>
-                            </div>
-                        )}
+                                </div>
+                            </article>
+                        ))}
                     </div>
                 )}
             </main>
-        </>
+        </div>
     );
 }

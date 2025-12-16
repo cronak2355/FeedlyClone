@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import '../styles/discover.css';
+import '/src/styles/discover.css';
 
 interface SavedArticle {
     url: string;

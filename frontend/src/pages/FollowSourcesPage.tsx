@@ -86,15 +86,6 @@ export default function FollowSourcesPage() {
         setFeedsLoading(false);
     };
 
-    const fetchReddit = async (sub: string) => {
-        setRedditLoading(true);
-        try {
-            const res = await fetch(`http://localhost:8080/api/reddit?subreddit=${sub}`, { credentials: 'include' });
-            if (res.ok) setRedditFeed(await res.json());
-        } catch (e) { console.error(e); }
-        setRedditLoading(false);
-    };
-
     // 키워드 검색
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -127,6 +118,42 @@ export default function FollowSourcesPage() {
             const data = await res.json();
             if (data.success) {
                 setFollowedUrls(new Set([...followedUrls, site.feedUrl!]));
+                alert(data.message);
+            } else {
+                alert(data.message);
+            }
+        } catch (e) { 
+            alert('팔로우 실패'); 
+        }
+    };
+
+    const handleFeedFollow = async (site: DiscoveredFeed) => {
+        if (!site.feedUrl) return alert('RSS 피드가 없습니다.');
+        let url = "";
+        if (site.isFollowed)
+            url = 'http://localhost:8080/discover/unfollow';
+        else
+            url = 'http://localhost:8080/discover/follow';
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    websiteUrl: site.siteUrl, 
+                    feedUrl: site.feedUrl, 
+                    title: site.title, 
+                    description: site.description, 
+                    faviconUrl: site.faviconUrl 
+                }),
+                credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+                setFeeds(prev => prev.map(s => 
+                s.feedUrl === site.feedUrl 
+                    ? { ...s, isFollowed: !s.isFollowed }
+                    : s
+            ));
                 alert(data.message);
             } else {
                 alert(data.message);
@@ -235,7 +262,7 @@ export default function FollowSourcesPage() {
                     <>
                         {/* 키워드 검색 */}
                         <div className="keyword-search-box">
-                            <form onSubmit={handleFeedsSearch} className="keyword-form">
+                            <form onSubmit={handleSearch} className="keyword-form">
                                 <input
                                     type="text"
                                     value={keyword}
@@ -285,7 +312,7 @@ export default function FollowSourcesPage() {
                                         {site.hasFeed && site.feedUrl && (
                                             followedUrls.has(site.feedUrl) 
                                                 ? <span className="followed-badge"><i className="bi bi-check"></i></span>
-                                                : <button className="follow-btn" onClick={() => handleFollow(site)}>Follow</button>
+                                                : <button className="follow-btn" onClick={() => handleFollow(site)}>{}</button>
                                         )}
                                         {!site.hasFeed && <span className="no-rss">No RSS</span>}
                                     </div>
@@ -313,6 +340,10 @@ export default function FollowSourcesPage() {
                                             </div>
                                         </div>
                                         {feed.description && <p className="feed-description">{feed.description}</p>}
+                                        <button  onClick={() => handleFeedFollow(feed)}
+                                            className={`follow-btn ${feed.isFollowed ? 'following' : ''}`}>
+                                            {feed.isFollowed ? 'Following' : 'Follow'}
+                                        </button>
                                     </div>
                                 ))}
                             </div>

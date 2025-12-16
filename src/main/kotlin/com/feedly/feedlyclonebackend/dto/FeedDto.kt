@@ -12,7 +12,8 @@ data class FeedItem(
     val author: String? = null,
     val publishedDate: LocalDateTime? = null,
     val thumbnailUrl: String? = null,
-    val categories: List<String> = emptyList()
+    val categories: List<String> = emptyList(),
+    val sourceName: String? = null  // 추가
 )
 
 /**

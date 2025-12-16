@@ -51,20 +51,18 @@ export default function NewsPage() {
 
         try {
             const params = new URLSearchParams();
-            params.set('view', 'headlines');
             if (category) params.set('category', category.toLowerCase());
             if (query) params.set('query', query);
+            if (!query) params.set('view', 'headlines');
 
             const response = await fetch(`http://localhost:8080/api/discover?${params}`, {
                 credentials: 'include',
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch news');
-            }
+            if (!response.ok) throw new Error('Failed to fetch news');
 
             const data = await response.json();
-            setArticles(data.headlines || []);
+            setArticles(query ? (data.articles || []) : (data.headlines || []));
         } catch (err) {
             console.error('Fetch error:', err);
             setError('뉴스를 불러오는데 실패했습니다.');
@@ -80,7 +78,7 @@ export default function NewsPage() {
         setSearchParams(params);
     };
 
-    const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const params: Record<string, string> = {};
         if (category) params.category = category;
@@ -141,8 +139,7 @@ export default function NewsPage() {
     }
 
     return (
-        <>
-            {/* Header */}
+        <div className="news-page">
             <header className="discover-header">
                 <div className="header-top">
                     <h1>
@@ -150,7 +147,6 @@ export default function NewsPage() {
                         News
                     </h1>
 
-                    {/* Search */}
                     <form onSubmit={handleSearch} className="search-form">
                         <input
                             type="text"
@@ -165,7 +161,6 @@ export default function NewsPage() {
                     </form>
                 </div>
 
-                {/* Categories */}
                 <div className="category-filter">
                     <button
                         className={`category-btn ${!category ? 'active' : ''}`}
@@ -185,7 +180,6 @@ export default function NewsPage() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="discover-content">
                 {error ? (
                     <div className="error-container">
@@ -200,7 +194,7 @@ export default function NewsPage() {
                                 "{query}" 검색 결과
                             </p>
                         )}
-                        {articles.length ? (
+                        {articles.length > 0 ? (
                             articles.map((article, index) => (
                                 <article key={index} className="headline-item">
                                     {article.thumbnailUrl && (
@@ -241,6 +235,6 @@ export default function NewsPage() {
                     </div>
                 )}
             </main>
-        </>
+        </div>
     );
 }

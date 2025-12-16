@@ -26,7 +26,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    
+
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -38,6 +38,8 @@ dependencies {
     
     // RSS Parser - Rome 2.1.0
     implementation("com.rometools:rome:2.1.0")
+    implementation("com.rometools:rome-utils:2.1.0") // 유틸리티 (옵션, 로깅 등)
+    implementation("org.slf4j:slf4j-api:2.0.9") // 로깅 (필요 시)
     
     // HTML Parser - Jsoup 1.17.2
     implementation("org.jsoup:jsoup:1.17.2")

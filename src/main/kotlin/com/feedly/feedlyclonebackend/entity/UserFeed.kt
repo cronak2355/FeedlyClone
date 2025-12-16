@@ -13,7 +13,8 @@ class UserFeed(
     @Column(name = "user_id", nullable = false)
     val userId: Long = 1L,
 
-    @Column(name = "feed_url", nullable = false, length = 1000)
+    // 수정: length를 1000에서 500으로 변경 (MySQL utf8mb4 인덱스 제한 때문)
+    @Column(name = "feed_url", nullable = false, length = 500)
     var feedUrl: String,
 
     @Column(name = "feed_title", length = 500)

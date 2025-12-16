@@ -10,10 +10,11 @@ class PopularFeed(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "feed_url", nullable = false, unique = true, length = 1000)
+    // 수정: length를 1000에서 500으로 변경 (MySQL utf8mb4 인덱스 제한 때문)
+    @Column(name = "feed_url", nullable = false, unique = true, length = 500)
     var feedUrl: String,
 
-    @Column(name = "site_url", length = 1000)
+    @Column(name = "site_url", length = 500)
     var siteUrl: String? = null,
 
     @Column(name = "title", nullable = false, length = 500)

@@ -4,38 +4,25 @@ import com.feedly.feedlyclonebackend.entity.FeedItem
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
-import com.feedly.feedlyclonebackend.entity.Feed
 import org.springframework.stereotype.Repository
-import org.springframework.jdbc.core.JdbcTemplate
 
 @Repository
 interface FeedItemRepository : JpaRepository<FeedItem, Long> {
 
-    fun findByFeedIdOrderByPublishedAtDesc(feedId: Long): List<FeedItem>
-
-    @Query(
-        """
-        SELECT fi
-        FROM FeedItem fi
-        WHERE fi.userId = :userId
-          AND fi.isRead = false
-          AND fi.publishedAt >= :threshold
-        ORDER BY fi.publishedAt DESC
-        """
-    )
-    fun findTodayItems(
-        @Param("userId") userId: Long,
-        @Param("threshold") threshold: LocalDateTime
-    ): List<FeedItem>
-
-    fun findUnreadRecentByUser(
+    // 엔티티를 조회 (DTO 변환은 서비스 레이어에서 처리)
+    @Query("""
+        SELECT f FROM FeedItem f
+        WHERE f.userId = :userId
+          AND f.isRead = false
+          AND f.publishedAt >= :since
+        ORDER BY f.publishedAt DESC
+    """)
+    fun findUnreadRecentEntitiesByUser(
         @Param("userId") userId: Long,
         @Param("since") since: LocalDateTime
-    ): List<com.feedly.feedlyclonebackend.dto.FeedItem>
-
-    fun findByCompanyId(companyId: Long): List<Feed>
+    ): List<FeedItem>
+    fun findByFeedIdOrderByPublishedAtDesc (id:Long): List<FeedItem>
+    // companyId로 FeedItem 조회
+    fun findByCompanyId(companyId: Long): List<FeedItem>
 }
-
-
