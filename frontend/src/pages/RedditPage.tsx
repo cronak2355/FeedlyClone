@@ -200,7 +200,8 @@ export default function RedditPage() {
                                     )}
                                 </div>
                             </div>
-                            <button className={`follow-btn ${subreddit.isFollowed ? 'following' : ''}`}>
+                            <button  onClick={() => followFeed(subreddit)}
+                                className={`follow-btn ${subreddit.isFollowed ? 'following' : ''}`}>
                                 {subreddit.isFollowed ? 'Following' : 'Follow'}
                             </button>
                         </div>

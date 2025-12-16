@@ -41,6 +41,17 @@ create table account(
     ,password varchar(256) not null
 );
 
+CREATE TABLE feed_items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+     title VARCHAR(500) NOT NULL,
+     summary VARCHAR(2000) NOT NULL,
+     image_url VARCHAR(500),
+     source VARCHAR(200) NOT NULL,
+     published_at DATETIME NOT NULL,
+     is_read TINYINT(1) NOT NULL DEFAULT 0,
+     url VARCHAR(1000) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 인기 피드 초기 데이터
 INSERT INTO popular_feeds (feed_url, site_url, title, description, category, subscriber_count) VALUES
