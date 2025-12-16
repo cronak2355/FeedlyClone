@@ -86,7 +86,17 @@ export default function FollowSourcesPage() {
         setFeedsLoading(false);
     };
 
-    const handleFeedsSearch = async (e: React.FormEvent) => {
+    const fetchReddit = async (sub: string) => {
+        setRedditLoading(true);
+        try {
+            const res = await fetch(`http://localhost:8080/api/reddit?subreddit=${sub}`, { credentials: 'include' });
+            if (res.ok) setRedditFeed(await res.json());
+        } catch (e) { console.error(e); }
+        setRedditLoading(false);
+    };
+
+    // 키워드 검색
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!keyword.trim()) return;
 

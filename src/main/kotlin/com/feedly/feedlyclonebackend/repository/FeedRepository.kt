@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface FeedRepository : JpaRepository<Feed, Long> {
-    fun findByCompanyId(companyId:Long) : List<Feed>
-    
+    fun findByCompanyId(companyId:Long) : List<Feed>   
+
+    fun existsByUrl(url: String): Boolean
 }
