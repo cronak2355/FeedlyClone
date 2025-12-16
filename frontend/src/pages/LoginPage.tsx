@@ -22,8 +22,11 @@ export default function LoginPage() {
                 credentials: 'include',
             });
 
-            if (response.ok || response.redirected) {
-                window.location.href = 'http://localhost:5173/discover';
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/discover';
+                }
             } else {
                 setError('Invalid email or password.');
             }

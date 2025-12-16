@@ -668,11 +668,24 @@ h6 {
 }
 
 .headline-thumbnail {
-    width: 120px;
-    height: 80px;
-    object-fit: cover;
+    width: 140px;
+    min-width: 140px;
+    height: 90px;
     border-radius: 6px;
     flex-shrink: 0;
+    overflow: hidden;
+    background: var(--border-color);
+}
+
+.headline-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+.headline-item:hover .headline-thumbnail img {
+    transform: scale(1.05);
 }
 
 .headline-content {

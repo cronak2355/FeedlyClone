@@ -44,22 +44,6 @@ export default function Layout({ children }: LayoutProps) {
                     </Link>
                 </nav>
 
-                <div className="nav-section-title">Feeds</div>
-                <nav className="sidebar-nav">
-                    <div className="sidebar-item text-muted small">
-                        <i className="bi bi-plus"></i>
-                        <span>Add Content</span>
-                    </div>
-                </nav>
-
-                <div className="nav-section-title">Boards</div>
-                <nav className="sidebar-nav">
-                    <div className="sidebar-item text-muted small">
-                        <i className="bi bi-plus"></i>
-                        <span>Create Board</span>
-                    </div>
-                </nav>
-
                 {/* Footer Links */}
                 <div className="sidebar-footer">
                     <a href="#" className="sidebar-item text-muted small">
