@@ -26,6 +26,7 @@ class ArticleInteractionController(
         val thumbnailUrl: String? = null,
         val siteName: String? = null
     )
+
     @PostMapping("/save")
     fun toggleSave(@RequestBody request: ArticleRequest): ResponseEntity<Map<String, Any>> {
         val isSaved = service.toggleSave(
